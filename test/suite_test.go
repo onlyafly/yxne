@@ -1,8 +1,7 @@
-package lang
+package test
 
 import (
 	"bytes"
-	"go/ast"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,8 +14,9 @@ import (
 )
 
 const (
-	testsuiteDir = "testsuite"
-	baseDir      = ".."
+	testsuiteDir   = "test/testdata"
+	baseDir        = ".."
+	fileExtPattern = "*.yaml"
 )
 
 // TestFullSuite runs the entire language test suite
@@ -24,19 +24,22 @@ func TestFullSuite(t *testing.T) {
 
 	// We set the base directory so that the test cases can use paths that make
 	// sense. If this is not set, the current working directory while the tests
-	// run will be "lang"
-	os.Chdir(baseDir)
+	// run will be "test"
+	err := os.Chdir(baseDir)
+	if err != nil {
+		t.Errorf("Error changing directory to <" + baseDir + ">: " + err.Error())
+	}
 
-	filepath.Walk(testsuiteDir, func(fp string, fi os.FileInfo, err error) error {
+	err = filepath.Walk(testsuiteDir, func(fp string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return nil // Can't visit this node, but continue walking elsewhere
 		}
-		if !!fi.IsDir() {
+		if fi.IsDir() {
 			return nil // Not a file, ignore.
 		}
 
 		name := fi.Name()
-		matched, err := filepath.Match("*.v", name)
+		matched, err := filepath.Match(fileExtPattern, name)
 		if err != nil {
 			return err // malformed pattern
 		}
@@ -47,6 +50,10 @@ func TestFullSuite(t *testing.T) {
 
 		return nil
 	})
+
+	if err != nil {
+		t.Errorf("Error walking test suite directory <" + testsuiteDir + ">: " + err.Error())
+	}
 }
 
 func testInputFile(sourceFilePath string, t *testing.T) {

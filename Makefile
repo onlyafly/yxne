@@ -1,5 +1,13 @@
 all: run
 
-run:
-	go install ./...
+run: install
 	yxne
+
+fmt:
+	go fmt ./...
+
+test: fmt
+	go test ./...
+
+install: fmt
+	go install ./...
