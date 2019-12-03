@@ -70,3 +70,8 @@ def(double [x],
   if(isnum(x)
     return(*(x 2))
     panic(x "is not a number")
+
+def double x
+  if isnum(x)
+    return *(x 2)
+    panic x "is not a number"
